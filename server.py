@@ -52,10 +52,18 @@ def SFresult():
    if request.method == 'POST':
       result = request.form
       
+ #     sql_qry="""
+ #     select data_sp as StoragePolicy, COUNT(distinct( clientname))as Number from commcellbackupinfo where backuplevel = 'SyntheticFull' group by    
+ #     data_sp ORDER BY Number 
+ #     """
+      
       sql_qry="""
-      select data_sp as StoragePolicy, COUNT(distinct( clientname))as Number from commcellbackupinfo where backuplevel = 'SyntheticFull' group by    
-      data_sp ORDER BY Number 
+	select data_sp as StoragePolicy, COUNT( clientname )as Number from commcellbackupinfo where backuplevel = 'SyntheticFull' and
+      startdate>dateadd(day, -7, getdate())
+      group by   data_sp  ORDER BY Number 
       """
+	  
+	  
       cnxn = pyodbc.connect(DSN=CS[result["Commcell"]])
       
       df = pd.read_sql(sql_qry, cnxn)
@@ -91,9 +99,12 @@ def result():
       where backuplevel = 'SyntheticFull' and  data_sp=
       """
       sql_qry2="""
-       and startdate>dateadd(day, -8, getdate())
+      
+      and startdate>dateadd(day, -7, getdate())
       group by DATENAME(DW,startdate) 
       """
+	  
+	  # and startdate>dateadd(day, -8, getdate())    Removed
       ## Build the Query 
       sql_qry=sql_qry1+SP+sql_qry2
      
